@@ -1,27 +1,52 @@
-import { Injectable } from '@nestjs/common';
-import { CreateWorkflowDto } from './dto/create-workflow.dto';
-import { UpdateWorkflowDto } from './dto/update-workflow.dto';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Workflow } from './entities/workflow.entity';
+import { CreateWorkflowDto, UpdateWorkflowDto } from '@app/workflows';
 
 @Injectable()
 export class WorkflowsService {
-  create(createWorkflowDto: CreateWorkflowDto) {
-    console.log('WorkflowsService');
-    return 'This action adds a new workflow';
+  constructor(
+    @InjectRepository(Workflow)
+    private readonly workflowsRepository: Repository<Workflow>,
+  ) {}
+
+  async findAll(): Promise<Workflow[]> {
+    return this.workflowsRepository.find();
   }
 
-  findAll() {
-    return `This action returns all workflows`;
+  async findOne(id: number): Promise<Workflow> {
+    const workflow = await this.workflowsRepository.findOne({ where: { id } });
+    if (!workflow) {
+      throw new NotFoundException(`Building with id ${id} not found`);
+    }
+    return workflow;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} workflow`;
+  async create(crateWorkflowDto: CreateWorkflowDto): Promise<Workflow> {
+    const workflow = await this.workflowsRepository.create({
+      ...crateWorkflowDto,
+    });
+    const newWorkflowEntity = await this.workflowsRepository.save(workflow);
+    return newWorkflowEntity;
   }
 
-  update(id: number, updateWorkflowDto: UpdateWorkflowDto) {
-    return `This action updates a #${id} workflow`;
+  async update(
+    id: number,
+    updateWorkflowDto: UpdateWorkflowDto,
+  ): Promise<Workflow> {
+    const workflow = await this.workflowsRepository.preload({
+      id: +id,
+      ...updateWorkflowDto,
+    });
+    if (!workflow) {
+      throw new NotFoundException(`Building with id ${id} not found`);
+    }
+    return this.workflowsRepository.save(workflow);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} workflow`;
+  async remove(id: number): Promise<Workflow> {
+    const workflow = await this.workflowsRepository.findOne({ where: { id } });
+    return await this.workflowsRepository.remove(workflow);
   }
 }
