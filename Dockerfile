@@ -13,5 +13,3 @@ COPY . .
 RUN npm run build -- ${APP_NAME}
 
 CMD [ "node", "dist/apps/${APP_NAME}/main.js" ]
-
-#CMD ["npm", "run", "start:dev", "--", "${APP_NAME}"]
