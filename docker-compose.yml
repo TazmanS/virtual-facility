@@ -17,6 +17,7 @@ services:
       - POSTGRES_DB=workflows
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - NATS_URL=nats://nats:4222
     volumes:
       - ./libs:/usr/src/app/libs
       - ./package.json:/usr/src/app/package.json
@@ -24,6 +25,7 @@ services:
       - ./apps/workflows-service:/usr/src/app/apps/workflows-service
     depends_on:
       - workflows-db
+      - nats
   workflows-db:
     restart: always
     image: postgres:13.2-alpine
@@ -49,6 +51,7 @@ services:
       - POSTGRES_DB=virtual-facility
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
+      - NATS_URL=nats://nats:4222
     volumes:
       - ./libs:/usr/src/app/libs
       - ./package.json:/usr/src/app/package.json
@@ -57,6 +60,7 @@ services:
     depends_on:
       - virtual-facility-db
       - workflows-service
+      - nats
   virtual-facility-db:
     restart: always
     image: postgres:13.2-alpine
@@ -64,5 +68,7 @@ services:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_DB=virtual-facility
+  nats:
+    image: nats:2.2.2-alpine
 volumes:
   postgres_db:
