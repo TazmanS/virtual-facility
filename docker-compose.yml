@@ -18,6 +18,8 @@ services:
       - CHOKIDAR_USEPOLLING=true
       - WATCHPACK_POLLING=true
       - NATS_URL=nats://nats:4222
+    deploy:
+      replicas: 3
     volumes:
       - ./libs:/usr/src/app/libs
       - ./package.json:/usr/src/app/package.json
